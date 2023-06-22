@@ -1,0 +1,163 @@
+﻿@page "/"
+
+@inject IJSRuntime JSRuntime
+@inject IStoryService StoryService
+@inject IMapper Mapper
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+            <h3>Enter your story:</h3>
+            @if (_storyModel is null)
+            {
+                <div id="contentEditableStory" class="form-control form-story" contenteditable="true" @oninput="UpdateChips"></div>
+            }
+            else
+            {
+                <div id="contentEditableStory" class="form-control form-story" contenteditable="true" @oninput="UpdateChips">
+                    @foreach (var str in _storyModel.Text.Split('\n', '\r'))
+                    {
+                        @if (string.IsNullOrWhiteSpace(str) || string.IsNullOrEmpty(str))
+                        {
+                            continue;
+                        }
+                        @if (StoryParser.RegexName().IsMatch(str))                            
+                        {
+                            var chip = @_storyModel?.Chips?[str];
+                            <button class="btn btn-chip" @onclick="()=>ShowChangeNameModal(chip!)" style="background-color:@chip?.Color">@chip?.Name</button>
+                            <br>
+                        }
+                        else
+                        {
+                            @str
+                            <br>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col">
+            <button @onclick="SaveStory" class="btn btn-primary">Save Story</button>
+        </div>
+    </div>
+</div>
+<ChangeNameModal @ref="_editName" Title="Change name" Chip="_chipChange" Save="OnSaveChanges" OnCancel="OnCancelEdit"></ChangeNameModal>
+@if (_updateDiologOpen)
+{
+    <Confirm Title="Are you sure?" Text="The current history will be saved!" OnClose="@OnSaveDialogClose" DialogType="Confirm.ModalDialogType.OkCancel"></Confirm>
+}
+
+@code {
+    private StoryModel? _storyModel;
+    private ChipModel? _chipChange;
+    private ChangeNameModal? _editName;
+    private string? _oldName;
+    private bool _updateDiologOpen;
+    private int _idStory;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var story = await StoryService.Get();
+        _idStory = story.Id;
+        _storyModel = Mapper.Map<StoryModel>(story.ParseName());
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        SetFocus();
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    #region Save to DB
+    /// <summary>
+    /// Show the save to database dialog form.
+    /// </summary>
+    private void SaveStory()
+    {
+        _updateDiologOpen = true;
+    }
+
+    /// <summary>
+    /// Save history to database if user.
+    /// </summary>
+    /// <param name="accepted">Accepted</param>
+    private void OnSaveDialogClose(bool accepted)
+    {
+        if (accepted)
+        {
+            StoryService.Update(_storyModel!.Id, Mapper.Map<StoryDto>(_storyModel));
+        }
+        _updateDiologOpen = false;
+    }
+    #endregion
+
+    #region Change names
+    /// <summary>
+    /// Show the form of changes in names.
+    /// </summary>
+    /// <param name="chip"></param>
+    private void ShowChangeNameModal(ChipModel chip)
+    {
+        _chipChange = chip;
+        _oldName = chip.Name;
+        _editName!.Show();
+    }
+
+    /// <summary>
+    /// Change names in texarea.
+    /// </summary>
+    private void OnSaveChanges()
+    {
+        _editName!.Hide();
+        var story = _storyModel?.Clone() as StoryModel;
+        _storyModel = Mapper.Map<StoryModel>(Mapper.Map<StoryDto>(story).ChangeName(_oldName!, _chipChange!.Name));
+    }
+
+    /// <summary>
+    /// Save the form of changes in names.
+    /// </summary>
+    /// <param name="chip"></param>
+    private void OnCancelEdit(ChipModel chip)
+    {
+        chip.Name = _oldName!;
+        _editName!.Hide();
+    }
+    #endregion
+
+    /// <summary>
+    /// Update textarea and install chips.
+    /// </summary>
+    /// <returns></returns>
+    private async Task UpdateChips()
+    {
+        _storyModel = null;
+        var story = await GetStory();
+        _storyModel = Mapper.Map<StoryModel>(story.ParseName());
+        SetFocus();
+    }
+
+    /// <summary>
+    /// Get story from textarea.
+    /// </summary>
+    /// <returns>New story</returns>
+    private async Task<StoryDto> GetStory()
+    {
+        return new StoryDto() { Id = _idStory, Text = await GetText(), Chips = new Dictionary<string, ChipDto>() };
+    }
+
+    /// <summary>
+    /// Get text from textarea.
+    /// </summary>
+    /// <returns>Inner text</returns>
+    private async Task<string> GetText() => await JSRuntime.InvokeAsync<string>("contentEditable.getText", "contentEditableStory");
+
+    /// <summary>
+    /// Set focus to end of text.
+    /// </summary>
+    private async void SetFocus()
+    {
+        await JSRuntime.InvokeVoidAsync("contentEditable.setFocus", "contentEditableStory");
+    }
+}

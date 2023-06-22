@@ -1,0 +1,35 @@
+﻿.editor-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.editor-panel {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.btn-chip{
+    padding: 0px;
+    margin: 1px;    
+}
+
+.form-story {
+    width: auto;
+    height: auto;
+    min-height: 500px;
+    overflow: auto
+}
+
+.story-preview .character-chip {
+    padding: 2px 5px;
+    color: white;
+    border-radius: 4px;
+    margin-right: 3px;
+    cursor: pointer;
+}
+
+.save-button {
+    margin-top: 10px;
+}

@@ -1,0 +1,40 @@
+﻿@using StoryNameLink.ViewModel;
+@if (_displayEdit)
+{
+    <div>
+        <EditForm class="modal fade show" tabindex="-1" aria-hidden="true" Model="@Chip" style="display: block" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+            <div class="modal-content container" role="document">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Title</h5>
+                </div>
+                <div class="form-group modal-body">
+                    <label>Name:</label>
+                    <div class="">
+                        <InputText class="form-control" @bind-Value=@Chip!.Name />
+                        <ValidationMessage For="@(() => Chip.Name)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="submit">Save Changes</button>
+                    <button @onclick="Cancel" type="button" class="btn btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+}
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public ChipModel? Chip { get; set; }
+    [Parameter] public EventCallback Save { get; set; }
+    [Parameter] public EventCallback<ChipModel> OnCancel { get; set; }
+
+    private bool _displayEdit = false;
+    public void Show() => _displayEdit = true;
+    public void Hide() => _displayEdit = false;
+
+    private Task Cancel()
+    {
+        return OnCancel.InvokeAsync(Chip);
+    }
+}
