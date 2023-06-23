@@ -7,6 +7,7 @@ Used Blazor.server. Created one page. Used MSSQL database. Created four levels o
 2. Infrastructure layer with connected EntityFramework. Provides CRUD operations.
 3. The level of services for processing business logic.
 4. The Blazor.server project itself for the user interface.
+
 This will prepare the project for future expansion.
 ### Trade-offs and areas for improvement.
 1. One of the trade-offs is the lack of real-time collaboration or simultaneous editing by multiple users. The application is currently single-user focused and does not handle concurrent changes by multiple users.
@@ -26,6 +27,7 @@ This will prepare the project for future expansion.
 2. Уровень инфраструктуры с подключенным EntityFramework. Предоставляет CRUD операции.
 3. Уровень сервисов для обработки бизнес-логики.
 4. Сам проект Blazor.server для пользовательского интерфейса.
+
 Так проект будет подготовлен для будущего расширения.
 ### Компромиссы и области для улучшения.
 1. Одним из компромиссов является отсутствие совместной работы в реальном времени или одновременного редактирования несколькими пользователями. В настоящее время приложение ориентировано на одного пользователя и не обрабатывает одновременные изменения несколькими пользователями.
