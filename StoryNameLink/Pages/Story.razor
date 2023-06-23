@@ -64,10 +64,9 @@
         _storyModel = Mapper.Map<StoryModel>(story.ParseName());
     }
 
-    protected override Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        SetFocus();
-        return base.OnAfterRenderAsync(firstRender);
+        await SetFocus();        
     }
 
     #region Save to DB
@@ -134,8 +133,7 @@
     {
         _storyModel = null;
         var story = await GetStory();
-        _storyModel = Mapper.Map<StoryModel>(story.ParseName());
-        SetFocus();
+        _storyModel = Mapper.Map<StoryModel>(story.ParseName());        
     }
 
     /// <summary>
@@ -156,7 +154,7 @@
     /// <summary>
     /// Set focus to end of text.
     /// </summary>
-    private async void SetFocus()
+    private async Task SetFocus()
     {
         await JSRuntime.InvokeVoidAsync("contentEditable.setFocus", "contentEditableStory");
     }
