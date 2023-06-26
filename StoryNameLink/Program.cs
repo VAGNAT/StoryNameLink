@@ -1,4 +1,5 @@
 using StoryNameLink.Helpers;
+using StoryNameLink.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseExceptionHandlerMiddleware();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
